@@ -1,0 +1,52 @@
+package main;
+
+import java.util.LinkedList;
+import java.util.List;
+
+public class Knight extends Piece {
+
+
+    public Knight(String SIDE, Place place) {
+        super(SIDE, place);
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Knight knight = (Knight) o;
+        return place.equals(knight.place) && SIDE.equals(knight.SIDE) && MY_KING == knight.MY_KING;
+    }
+
+
+
+    public List<Place> makeWhereIAttack(){
+        List<Place> whereIAttack = new LinkedList<>();
+        List<Place> possibleLocations = List.of(
+                new Place(getRank() +2,getFile()+1 ),
+                new Place(getRank() +2,getFile()-1 ),
+                new Place(getRank() -2,getFile()+1 ),
+                new Place(getRank() -2,getFile()-1 ),
+                new Place(getRank() +1,getFile()+2 ),
+                new Place(getRank() +1,getFile()-2 ),
+                new Place(getRank() -1,getFile()+2 ),
+                new Place(getRank() -1,getFile()-2 )
+                );
+        for(Place place:possibleLocations){
+
+            if(canIEatAt(place))
+                whereIAttack.add(place);
+        }
+        return whereIAttack;
+    }
+
+    @Override
+    public String toString() {
+        return "Knight{" +
+                ", SIDE='" + SIDE + '\'' +
+                ", MY_KING=" + MY_KING.SIDE + " King" +
+                ", place=" + place +
+                '}';
+    }
+}
