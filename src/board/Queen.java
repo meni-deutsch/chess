@@ -1,9 +1,9 @@
-package main;
+package board;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import static main.Board.WHITE;
+import static board.Board.WHITE;
 
 public class Queen extends Piece {
 

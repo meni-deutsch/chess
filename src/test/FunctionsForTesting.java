@@ -1,6 +1,6 @@
 package test;
 
-import main.*;
+import board.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.params.provider.Arguments;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
-import static main.Board.BLACK; import static main.Board.WHITE;
+import static board.Board.BLACK; import static board.Board.WHITE;
 
 public class FunctionsForTesting {
 

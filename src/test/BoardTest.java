@@ -1,6 +1,6 @@
 package test;
 
-import main.*;
+import board.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,7 +12,7 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static main.Board.*;
+import static board.Board.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BoardTest {

@@ -1,11 +1,11 @@
-package main;
+package board;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.List;
 
-import static main.Board.*;
+import static board.Board.*;
 
 public class Game {
     private static String side = WHITE;

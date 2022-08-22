@@ -1,8 +1,8 @@
 package test;
 
-import main.Board;
-import main.Pawn;
-import main.Place;
+import board.Board;
+import board.Pawn;
+import board.Place;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import static main.Board.BLACK; import static main.Board.WHITE;
+import static board.Board.BLACK; import static board.Board.WHITE;
 
 public class TestPawn {
     private static Stream<Arguments> testsForWalking() {

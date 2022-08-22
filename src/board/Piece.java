@@ -1,11 +1,11 @@
-package main;
+package board;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static main.Board.*;
+import static board.Board.*;
 
 public abstract class Piece {
     /**

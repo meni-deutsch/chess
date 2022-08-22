@@ -1,11 +1,11 @@
-package main;
+package board;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 
-import static main.Board.WHITE;
+import static board.Board.WHITE;
 
 public class GhostPawn extends Piece {
 

@@ -1,4 +1,4 @@
-package main;
+package board;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -52,7 +52,6 @@ public class Place implements Comparable<Place> {
      * Compares this object with the specified object for order.  Returns a
      * negative integer, zero, or a positive integer as this object is less
      * than, equal to, or greater than the specified object.
-     *
      *
      * @param o the object to be compared.
      * @return a negative integer, zero, or a positive integer as this object

@@ -1,6 +1,6 @@
 package test;
 
-import static main.Board.*;
+import static board.Board.*;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;

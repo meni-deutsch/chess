@@ -1,4 +1,4 @@
-package main;
+package board;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -7,8 +7,8 @@ import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 
-import static main.Board.WHITE;
-import static main.Board.add;
+import static board.Board.WHITE;
+import static board.Board.add;
 
 public class Pawn extends Piece {
     private boolean wasMoved = false;

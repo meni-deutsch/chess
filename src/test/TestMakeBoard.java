@@ -1,13 +1,13 @@
 package test;
 
-import main.Board;
-import main.Place;
-import main.Queen;
-import main.Rook;
+import board.Board;
+import board.Place;
+import board.Queen;
+import board.Rook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import static main.Board.BLACK; import static main.Board.WHITE;
+import static board.Board.BLACK; import static board.Board.WHITE;
 
 public class TestMakeBoard {
 
