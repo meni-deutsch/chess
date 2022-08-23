@@ -5,16 +5,15 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.List;
 
-import static board.Board.WHITE;
-
-public class GhostPawn extends Piece {
+import static board.Side.WHITE;
+class GhostPawn extends Piece {
 
     public final Pawn ORIGINAL_PAWN;
 
     public GhostPawn(@NotNull Pawn pawn) {
         super(pawn.SIDE, new Place(pawn.getRank() + (pawn.SIDE.equals(WHITE) ? 1 : -1), pawn.getFile()));
         ORIGINAL_PAWN = pawn;
-        Board.add(this);
+        board.add(this);
     }
 
     @Override

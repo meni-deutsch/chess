@@ -5,13 +5,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Rook extends Piece {
+class Rook extends Piece {
 
     private boolean wasMoved = false;
 
 
-    public Rook(String SIDE, Place place) {
-        super(SIDE, place);
+    public Rook(Side side, Place place) {
+        super(side, place);
     }
 
 
@@ -35,7 +35,7 @@ public class Rook extends Piece {
     @Override
     public void moveTo(@NotNull Place whereToMove){
         if(rightToCastling())
-            Board.Recording.clear();
+            board.clearRecording();
         wasMoved = true;
         super.moveTo(whereToMove);
     }

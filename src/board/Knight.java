@@ -3,11 +3,11 @@ package board;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Knight extends Piece {
+class Knight extends Piece {
 
 
-    public Knight(String SIDE, Place place) {
-        super(SIDE, place);
+    public Knight(Side side, Place place) {
+        super(side, place);
     }
 
 

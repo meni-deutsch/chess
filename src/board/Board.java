@@ -4,16 +4,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.*;
+
+import static board.Side.BLACK;
+import static board.Side.WHITE;
 
 
 /**
@@ -21,90 +15,31 @@ import java.util.*;
  * The class that manages the board, moves the pieces, and stores them
  */
 
-
-public class Board {
-    public static final King WHITE_KING;
-    public static final King BLACK_KING;
-    /**
-     * The colors white and black
-     */
-    public static final String BLACK = "black";
-    public static final String WHITE = "white";
-    private static List<Piece> whitePieces = new LinkedList<>();
-    private static List<Piece> blackPieces = new LinkedList<>();
+public class Board implements IBoardCommands {
+    private static Board instance;
+    final King WHITE_KING;
+    final King BLACK_KING;
+    final private Piece[][] board = new Piece[8][8];
+    private final List<State> recordingOfBoards = new ArrayList<>(List.of());
+    private final List<String> moveRecording = new ArrayList<>();
+    final private List<Piece> whitePieces = new LinkedList<>();
+    final private List<Piece> blackPieces = new LinkedList<>();
+    private Place endangeredKing;
     /**
      * A variable that says if the game is on going, or over, and if it's over from which cause
      */
-    private static String gameStatus = "on going";
-    //region board
-    private static Piece[][] board = new Piece[8][8];
-    private static UI boardUI;
-    //endregion
-
-    static {
-        WHITE_KING = new King(WHITE);
-        BLACK_KING = new King(BLACK);
-    }
-
-
-    /**
-     * Returns true if the available pieces can checkmate the other side. The method <b>isn't perfect</b>. There a lot of
-     * cases that a checkmate isn't possible, no matter which moves would be done, but the method wouldn't return true.
-     * The method checks only if the pieces are enough to checkmate, not if the position of the pieces is checkmate-able.
-     *
-     * @param side the side the method checks if the pieces can checkmate.
-     * @return can the side checkmate
-     */
-    public static boolean canCheckMate(String side) {
-        var mySide = mySide(side);
-        if (mySide.stream().anyMatch(x -> x instanceof Rook || x instanceof Queen || x instanceof Pawn))
-            return true;
-        if (mySide.stream().filter(x -> x instanceof Bishop || x instanceof Knight).count() >= 2 && mySide.stream().anyMatch(x -> x instanceof Knight))
-            return true;
-        if (mySide.stream().filter(x -> x instanceof Bishop).count() >= 2) {
-            //noinspection OptionalGetWithoutIsPresent
-            return !isWhole((float) (mySide.stream().filter(x -> x instanceof Bishop)
-                    .map(x -> (x.getFile() + x.getRank()) % 2).reduce(Integer::sum).get()) /
-                    mySide.stream().filter(x -> x instanceof Bishop).count());
-        }
-        return false;
-    }
-
-    /**
-     * Checks if there are a piece that can move. If there are non, ends the game by changing the {@code gameStatus} to
-     * "stalemate - draw".
-     *
-     * @param side which side to check
-     */
-    public static void checkIfPiecesCanMove(String side) {
-        for (Piece piece : mySide(side)
-        ) {
-            if (!piece.whereCanIMove.isEmpty()) {
-                return;
-            }
-        }
-        if (myKing(side).isEndangered())
-            gameStatus = side.equals(WHITE) ? BLACK : WHITE + " win";
-        else
-            gameStatus = "stalemate - draw";
-    }
-
-    /**
-     * Like {@link Board#canCheckMate} but for both of the sides. If both of the sides can't checkmate, ends the game by
-     * changing {@code gameStatus} to "dead position - draw".
-     */
-    public static void isDeadPosition() {
-        gameStatus = canCheckMate(WHITE) || canCheckMate(BLACK) ? gameStatus : "dead position - draw";
-    }
+    private String gameStatus = "on going";
+    private int numOfMovesFromPawnMovingOrPieceCaptured = 0;
 
     /**
      * Makes a new game board. resets the board and the pieces, adds all the pieces to the board.
      * Updates there possible moves, and open the user interface.
      */
-    public static void makeBoard() {
-        //reset the board and the pieces
-        empty();
+    private Board() {
         //region making the pieces and inserting them to the players' pieces
+        instance = this;
+        WHITE_KING = new King(WHITE);
+        BLACK_KING = new King(BLACK);
         add(WHITE_KING);
         add(BLACK_KING);
         add(new Queen(WHITE));
@@ -127,15 +62,85 @@ public class Board {
         }
         //endregion making the pieces and inserting them to the players' pieces
         updateWhereCanThePiecesGo(WHITE);
-        boardUI = new Board.UI();
-        boardUI.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                int[] i = {1};
-                Board.Recording.moveRecording.forEach(move -> System.out.println((i[0]++) + " " + move));
+        updateWhereCanThePiecesGo(BLACK);
+
+    }
+
+    static Board getInstance() {
+        if (instance == null) {
+            instance = new Board();
+        }
+        return instance;
+    }
+
+    public static Board newInstance() {
+        instance = new Board();
+        return instance;
+    }
+
+    /**
+     * is the place inputted by x and y isn't in the bounds of the board
+     *
+     * @param x the x coordinate
+     * @param y the y coordinate
+     * @return is the place inputted by x and y isn't in the bounds of the board
+     */
+    public static boolean isOutOfBounds(int x, int y) {
+        return 0 > x || x > 7 || 0 > y || y > 7;
+    }
+
+    private static boolean isWhole(float num) {
+        return num == Math.ceil(num);
+    }
+
+    /**
+     * Returns true if the available pieces can checkmate the other side. The method <b>isn't perfect</b>. There a lot of
+     * cases that a checkmate isn't possible, no matter which moves would be done, but the method wouldn't return true.
+     * The method checks only if the pieces are enough to checkmate, not if the position of the pieces is checkmate-able.
+     *
+     * @param side the side the method checks if the pieces can checkmate.
+     * @return can the side checkmate
+     */
+    boolean canCheckMate(Side side) {
+        var mySide = mySide(side);
+        if (mySide.stream().anyMatch(x -> x instanceof Rook || x instanceof Queen || x instanceof Pawn))
+            return true;
+        if (mySide.stream().filter(x -> x instanceof Bishop || x instanceof Knight).count() >= 2 && mySide.stream().anyMatch(x -> x instanceof Knight))
+            return true;
+        if (mySide.stream().filter(x -> x instanceof Bishop).count() >= 2) {
+            //noinspection OptionalGetWithoutIsPresent
+            return !isWhole((float) (mySide.stream().filter(x -> x instanceof Bishop)
+                    .map(x -> (x.getFile() + x.getRank()) % 2).reduce(Integer::sum).get()) /
+                    mySide.stream().filter(x -> x instanceof Bishop).count());
+        }
+        return false;
+    }
+
+    /**
+     * Checks if there are a piece that can move. If there are non, ends the game by changing the {@code gameStatus} to
+     * "stalemate - draw".
+     *
+     * @param side which side to check
+     */
+    void checkIfPiecesCanMove(Side side) {
+        for (Piece piece : mySide(side)
+        ) {
+            if (!piece.whereCanIMove.isEmpty()) {
+                return;
             }
-        });
-        boardUI.setVisible(true);
+        }
+        if (myKing(side).isEndangered())
+            gameStatus = (side == WHITE ? BLACK : WHITE) + " win";
+        else
+            gameStatus = "stalemate - draw";
+    }
+
+    /**
+     * Like {@link Board#canCheckMate} but for both of the sides. If both of the sides can't checkmate, ends the game by
+     * changing {@code gameStatus} to "dead position - draw".
+     */
+    void isDeadPosition() {
+        gameStatus = canCheckMate(WHITE) || canCheckMate(BLACK) ? gameStatus : "dead position - draw";
     }
 
     /**
@@ -143,7 +148,7 @@ public class Board {
      *
      * @param side which pieces to update the white or the black
      */
-    public static void updateWhereCanThePiecesGo(@NotNull String side) {
+    void updateWhereCanThePiecesGo(@NotNull Side side) {
         mySide(side).forEach(Piece::whereCanIMove);
         deleteGhostPawns(side);
     }
@@ -153,7 +158,7 @@ public class Board {
      *
      * @param side the side to delete from
      */
-    public static void deleteGhostPawns(String side) {
+    void deleteGhostPawns(Side side) {
 
         for (Piece piece : mySide(side)
         ) {
@@ -167,7 +172,7 @@ public class Board {
      * @param place the location of the piece to check if it has castling rights.
      * @return does the piece has castling right with his king.
      */
-    public static boolean kingHasCastlingRightsWith(Place place) {
+    boolean kingHasCastlingRightsWith(Place place) {
         if (!(whoIn(place) instanceof Rook))
             return false;
         if (whoIn(place) == null)
@@ -181,7 +186,7 @@ public class Board {
      * @param place a string that tells the location of the piece to check if it has castling rights.
      * @return does the piece has castling right with his king.
      */
-    public static boolean kingHasCastlingRightsWith(String place) {
+    boolean kingHasCastlingRightsWith(String place) {
         return kingHasCastlingRightsWith(new Place(place));
     }
 
@@ -191,17 +196,8 @@ public class Board {
      * @param side the side of the king wanted.
      * @return the king of the side, side.
      */
-    public static King myKing(@NotNull String side) {
-        return side.equals(WHITE) ? WHITE_KING : BLACK_KING;
-    }
-
-    /**
-     * Returns the board
-     *
-     * @return {@code board}
-     */
-    public static Piece[][] getBoard() {
-        return board;
+    King myKing(@NotNull Side side) {
+        return side == WHITE ? WHITE_KING : BLACK_KING;
     }
 
     /**
@@ -210,11 +206,11 @@ public class Board {
      *
      * @return a schematic of the board.
      */
-    public static String[][] getBoardSchematics() {
+    private String[][] getBoardSchematics() {
         String[][] boardSchematics = new String[8][8];
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                boardSchematics[i][j] = whoIn(i, j) == null ? null : whoIn(i, j).SIDE + whoIn(i, j).getClass().getSimpleName();
+                boardSchematics[i][j] = whoIn(i, j) == null ? null : whoIn(i, j).SIDE + " " + whoIn(i, j).getClass().getSimpleName();
 
             }
 
@@ -230,7 +226,7 @@ public class Board {
      * @param place the location of the wanted piece.
      * @return the piece in place.
      */
-    public static @Nullable Piece whoIn(@NotNull Place place) {
+    @Nullable Piece whoIn(@NotNull Place place) {
         return whoIn(place.getRank(), place.getFile());
     }
 
@@ -241,7 +237,7 @@ public class Board {
      * @param file the file of the wanted piece. {@link Place#file}
      * @return the piece in rank and file
      */
-    public static @Nullable Piece whoIn(int rank, int file) {
+    @Nullable Piece whoIn(int rank, int file) {
         if (rank < 0 || file < 0 || rank > 7 || file > 7)
             return null;
         return board[rank][file];
@@ -253,7 +249,7 @@ public class Board {
      * @param place the place to change in.
      * @param piece the piece to change to, can be null.
      */
-    public static void change(@NotNull Place place, Piece piece) {
+    void change(@NotNull Place place, Piece piece) {
         board[place.getRank()][place.getFile()] = piece;
         if (piece != null)
             piece.setPlace(place);
@@ -265,7 +261,7 @@ public class Board {
      * @param num where in {@code whitePieces} to get
      * @return the piece in the num-th position in {@code whitePieces}.
      */
-    public static Piece whiteNumber(int num) {
+    Piece whiteNumber(int num) {
         return whitePieces.get(num);
     }
 
@@ -275,7 +271,7 @@ public class Board {
      * @param num where in {@code blackPieces} to get
      * @return the piece in the num-th position in {@code blackPieces}.
      */
-    public static Piece blackNumber(int num) {
+    Piece blackNumber(int num) {
         return blackPieces.get(num);
     }
 
@@ -284,7 +280,7 @@ public class Board {
      *
      * @return the number of white pieces.
      */
-    public static int numberOfWhite() {
+    int numberOfWhite() {
         return whitePieces.size();
     }
 
@@ -293,28 +289,8 @@ public class Board {
      *
      * @return the number of black pieces.
      */
-    public static int numberOfBlack() {
+    int numberOfBlack() {
         return blackPieces.size();
-    }
-
-    /**
-     * empty the board and lists of pieces.
-     */
-    public static void empty() {//for tests
-        board = new Piece[8][8];
-        whitePieces = new LinkedList<>();
-        blackPieces = new LinkedList<>();
-    }
-
-    /**
-     * is the place inputted by x and y isn't in the bounds of the board
-     *
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @return is the place inputted by x and y isn't in the bounds of the board
-     */
-    public static boolean isOutOfBounds(int x, int y) {
-        return 0 > x || x > 7 || 0 > y || y > 7;
     }
 
     /**
@@ -323,7 +299,7 @@ public class Board {
      * @param side the side that is opposite to the wanted side
      * @return the pieces of the opposite side
      */
-    public static @Unmodifiable List<Piece> oppositeSide(@NotNull String side) {
+    @Unmodifiable List<Piece> oppositeSide(@NotNull Side side) {
         return side.equals(WHITE) ? List.copyOf(blackPieces) : List.copyOf(whitePieces);
     }
 
@@ -333,8 +309,8 @@ public class Board {
      * @param side the side of the wanted pieces
      * @return the pieces of the opposite side
      */
-    public static @Unmodifiable List<Piece> mySide(@NotNull String side) {
-        return side.equals(WHITE) ? List.copyOf(whitePieces) : List.copyOf(blackPieces);
+    @Unmodifiable List<Piece> mySide(@NotNull Side side) {
+        return side == WHITE ? List.copyOf(whitePieces) : List.copyOf(blackPieces);
     }
 
     /**
@@ -342,12 +318,12 @@ public class Board {
      *
      * @param piece the piece to remove
      */
-    public static void remove(Piece piece) {
+    void remove(Piece piece) {
         if (piece == null)
             return;
         List<Piece> myPieces = piece.SIDE.equals(WHITE) ? whitePieces : blackPieces;
         myPieces.remove(piece);
-        Board.change(piece.getPlace(), null);
+        change(piece.getPlace(), null);
     }
 
     /**
@@ -355,12 +331,22 @@ public class Board {
      *
      * @param piece the piece to add
      */
-    public static void add(@NotNull Piece piece) {
+    void add(@NotNull Piece piece) {
         List<Piece> myPieces = piece.SIDE.equals(WHITE) ? whitePieces : blackPieces;
         myPieces.add(piece);
-        Board.change(piece.getPlace(), piece);
+        change(piece.getPlace(), piece);
 
     }
+
+    void unCheckKing() {
+        endangeredKing = null;
+    }
+
+    void checkKing(@NotNull King king) {
+        endangeredKing = king.getPlace();
+    }
+
+
 
     /**
      * returns a symbol corresponding with the type of the pieces
@@ -368,7 +354,7 @@ public class Board {
      * @param piece the pieces to make into a symbol
      * @return a symbol corresponding with the type of the pieces
      */
-    public static @NotNull String toSymbol(Piece piece) {
+    @NotNull String toSymbol(Piece piece) {
         if (piece instanceof King)
             return piece.SIDE.equals(WHITE) ? "\u265A" : "\u2654";
         if (piece instanceof Queen)
@@ -384,250 +370,113 @@ public class Board {
         return "\u9647";
     }
 
+
     /**
      * @return the status of the game
      */
-    public static String getGameStatus() {
+    public String getGameStatus() {
         return gameStatus;
     }
 
-    /**
-     * updates the graphical user interface
-     */
-    public static void updateUI() {
-        if (WHITE_KING.isEndangered())
-            markCheck(WHITE_KING.place);
-        if (BLACK_KING.isEndangered())
-            markCheck(BLACK_KING.place);
-        boardUI.update();
+    @Override
+    public List<Place> getAvailablePlaces(int rank, int file) {
+
+        return whoIn(rank, file).whereCanIMove;
     }
 
-    /**
-     * marks a location with a red colour. used to mark a check
-     *
-     * @param place the place to mark
-     */
-    public static void markCheck(Place place) {
-        boardUI.markCheck(place);
+    @Override
+    public Place move(int fromRank, int fileFile, int toRank, int toFile) {
+        Place place = new Place(toRank, toFile);
+        Piece chosenPiece = whoIn(fromRank, fileFile);
+        if (chosenPiece.whereCanIMove.contains(place)) {
+            chosenPiece.moveTo(place);
+            return endangeredKing;
+        }
+        return null;
     }
 
-    /**
-     * returns the colour of the location to the default colour. used after a check.
-     *
-     * @param place the place to restore
-     */
-    public static void deMarkCheck(Place place) {
-        boardUI.deMarkCheck(place);
+    @Override
+    public char getPieceTypeAt(int rank, int file) {
+        return whoIn(rank, file) == null ? ' ' : switch (whoIn(rank, file).getClass().getSimpleName()) {
+            case "King" -> 'k';
+            case "Queen" -> 'q';
+            case "Rook" -> 'r';
+            case "Bishop" -> 'b';
+            case "Knight" -> 'n';
+            case "Pawn" -> 'p';
+            case "GhostPawn" -> ' ';
+            default ->
+                    throw new IllegalStateException("Unexpected value: " + whoIn(rank, file).getClass().getSimpleName());
+        };
     }
 
-    /**
-     * Annotates all the inputted place with a green colour. used to mark a possible move.
-     *
-     * @param places the places to be mark with a green colour.
-     */
-    public static void annotatePossibleLocations(List<Place> places) {
-        boardUI.annotatePossibleLocations(places);
-    }
-
-    /**
-     * restores all the inputted place to there default colour. used after a mark of possible moves.
-     *
-     * @param places the places to be restored to there default colour.
-     */
-    public static void restoreLocations(List<Place> places) {
-        boardUI.restoreLocations(places);
+    @Override
+    public Side getPieceSideAt(int rank, int file) {
+        return whoIn(rank, file) == null ? null : whoIn(rank, file).SIDE;
     }
 
 
-    private static boolean isWhole(float num) {
-        return num == Math.ceil(num);
-    }
 
     /**
-     * closes the board. doesn't close the ui, but the player can't play after that the board is closed. prints to the console the moves.
+     * updates the recording of the prior boards, clears recording if non-retractable change was made. <br>
+     * if a pawn was moved - clearRecording in the moveTo method {@link Pawn#moveTo}.<br>
+     * if a piece was captured - clearRecording in the captured method {@link Piece#captured}.<br>
+     * if a castling right was lost - clearRecording in the rook's moveTo method {@link Rook#moveTo}.<br>
+     * if a pawn was promoted - not needed because pawn can be promoted, only if he was moved.<br>
+     * add the current state and check if there are two identical to him,
+     * - if there are change the game status to "threefold - draw"
      */
-    public static void closeBoard() {
-        boardUI.close();
-        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, StandardCharsets.UTF_8));
+    void updateRecording() {
+        recordingOfBoards.add(new State());
+        if (recordingOfBoards.stream().filter(recordingOfBoards.get(recordingOfBoards.size() - 1)::equals).count() >= 3) {
+            gameStatus = "threefold - draw";
+        }
+    }
+
+    void updateMoveRecording(@NotNull Place fromWhere, @NotNull Place toWhere, Piece piece) {
+        moveRecording.add(toSymbol(piece) + fromWhere + toWhere);
+    }
+
+    void resetMoveCount() {
+        numOfMovesFromPawnMovingOrPieceCaptured = -1;
+    }
+
+    void clearRecording() {
+        recordingOfBoards.clear();
+    }
+
+    void updateMoveCount() {
+        numOfMovesFromPawnMovingOrPieceCaptured++;
+        if (numOfMovesFromPawnMovingOrPieceCaptured >= 100)//over 100 hundred because counting both sides
+            gameStatus = "fifty moves from the last time the a pawn was moved, or a piece was captured - draw";
+
+    }
+
+    public void printMoveRecording() {
         int[] i = {1};
-        Board.Recording.moveRecording.forEach(move -> System.out.println((i[0]++) + " " + move));
-        JOptionPane.showMessageDialog(null, "The Game Ended - " + gameStatus);
+        moveRecording.forEach(move -> System.out.println((i[0]++) + " " + move));
     }
 
-    /**
-     * a class the represents a square in the board
-     */
-    private static class Square extends JButton {
-        /**
-         * the colour of the black squares.
-         */
-        public static final Color BLACK = new Color(0x6F, 0x3A, 0x25);
-        /**
-         * the colour of the white square
-         */
-        public static final Color WHITE = new Color(0xF3, 0x92, 0x64);
-        public final Place PLACE;
-        /**
-         * the default color of this square.
-         */
-        public final Color color;
-
-        /**
-         * the piece that is in this square. can be null
-         */
-        private Piece piece;
-
-
-        public Square(@NotNull Place place, int sizeOfBoard) {
-            super();
-            PLACE = place;
-            piece = whoIn(PLACE);
-            color = (place.getFile() + place.getRank()) % 2 == 0 ? BLACK : WHITE;
-            setBackground(color);
-
-            setSize((sizeOfBoard / 8), (sizeOfBoard / 8));
-            setLocation(PLACE.getFile() * getHeight(), getWidth() * 7 - PLACE.getRank() * getWidth());
-            if (piece != null){
-                ImageIcon imageIcon = new ImageIcon("src/main/pictures/" + piece.SIDE + " " + piece.getClass().getSimpleName().toLowerCase() + ".png");
-                //imageIcon = new ImageIcon(imageIcon.getImage().getScaledInstance((int)(getWidth()*0.7), (int)(getHeight()*0.7),Image.SCALE_SMOOTH));
-                setIcon(imageIcon);
-            }
-            addActionListener(e -> Game.pressed(this.PLACE));
-            setVisible(true);
-
-        }
-
-        /**
-         * updates the square, including his size, his icon, but not his colour that is updated in other functions.
-         */
-        public void update() {
-            piece = whoIn(PLACE);
-            if (piece != null)
-                setIcon(new ImageIcon("src/main/pictures/" + piece.SIDE + " " + piece.getClass().getSimpleName().toLowerCase() + ".png"));
-            else
-                setIcon(null);
-            setSize((boardUI.getMinDimension() / 8), (boardUI.getMinDimension() / 8));
-//            if (Game.getSide().equals(Board.WHITE))
-            setLocation(PLACE.getFile() * getHeight(), getWidth() * 7 - PLACE.getRank() * getWidth());
-//            else
-//                setLocation(getHeight() * 7 - PLACE.getFile() * getHeight(), PLACE.getRank() * getWidth());
-
-        }
-
-        public void restoreColor() {
-            setBackground(color);
-        }
-
-        public void clearActionListener() {
-            this.removeActionListener(getActionListeners()[0]);
-        }
+    public void changeTurn() {
+        Game.changeTurn();
     }
 
-    private static class BoardPanel extends JRootPane {
-        final Square[][] squares = new Square[8][8];
-
-        public BoardPanel(int size) {
-            super();
-            setBackground(Color.black);
-
-
-            for (int i = 0; i < 8; i++) {
-                for (int j = 0; j < 8; j++) {
-                    squares[i][j] = new Square(new Place(i, j), size);
-                    getContentPane().add(squares[i][j]);
-                }
-
-            }
-            getContentPane().add(glassPane);
-            setVisible(true);
-
-        }
-
-
-        public Square getSquareAt(Place place) {
-            return squares[place.getRank()][place.getFile()];
-        }
+    public Side getSide() {
+        return Game.getSide();
     }
 
-    private static class UI extends JFrame {
-        final BoardPanel boardPanel;
-        private int minDimension;
-        private final int barSize;
-        UI() {
-            setTitle("Meni's Chess");
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            minDimension = (int) (Math.min(screenSize.height * 0.9, screenSize.width * 0.9));
-            minDimension -= minDimension % 8;
-            setSize(minDimension, minDimension);
-            ImageIcon icon = new ImageIcon("src/main/pictures/chess logo.png");
-            this.setIconImage(icon.getImage());
-            setLocationRelativeTo(null);
-            setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            boardPanel = new BoardPanel(minDimension);
-            setRootPane(boardPanel);
-            setVisible(true);
-            barSize = (getBounds().height-getContentPane().getBounds().height);
-            System.out.println(getRootPane().getBounds().height+" " + barSize);
-            setSize(minDimension+15,minDimension+barSize);
-            this.getRootPane().addComponentListener(new ComponentAdapter() {
-                public void componentResized(ComponentEvent e) {
-                    // This is only called when the user releases the mouse button.
-                    UI.this.update();
-                }
-            });
-
-
-        }
-
-
-        public Square getSquareAt(Place place) {
-            return boardPanel.getSquareAt(place);
-        }
-
-        public void update() {
-            minDimension = Math.min(getHeight()-barSize, getWidth()-15);
-            minDimension -= minDimension % 8;
-            Arrays.stream(getContentPane().getComponents()).filter(x -> x instanceof Square).forEach(x -> ((Square) x).update());
-            //// TODO: 26/04/2022 make a more visually pleasing transition
-        }
-
-        public int getMinDimension() {
-            return minDimension;
-        }
-
-        public void markCheck(Place place) {
-            getSquareAt(place).setBackground(Color.red);
-        }
-
-        public void deMarkCheck(Place place) {
-            getSquareAt(place).restoreColor();
-        }
-
-        public void annotatePossibleLocations(List<Place> possibleLocations) {
-            possibleLocations.forEach(location -> getSquareAt(location).setBackground(Color.green));
-        }
-
-        public void restoreLocations(List<Place> possibleLocations) {
-            possibleLocations.forEach(location -> getSquareAt(location).restoreColor());
-        }
-
-        public void close() {
-            Arrays.stream(getContentPane().getComponents()).filter(x -> x instanceof Square).forEach(x -> ((Square) x).clearActionListener());
-
-        }
-
-    }
-
-    public static class State {
+    private class State {
         public final String[][] BOARD;
-        public final String SIDE;
+        public final Side SIDE;
         public final boolean[] castlingRights;
 
 
         public State() {
             this.BOARD = getBoardSchematics();
             this.SIDE = Game.getSide();
-            this.castlingRights = new boolean[]{kingHasCastlingRightsWith("a1"), kingHasCastlingRightsWith("a8"), kingHasCastlingRightsWith("h1"), kingHasCastlingRightsWith("h8")};
+            this.castlingRights = new boolean[]
+                    {kingHasCastlingRightsWith("a1"), kingHasCastlingRightsWith("a8"),
+                            kingHasCastlingRightsWith("h1"), kingHasCastlingRightsWith("h8")};
 
         }
 
@@ -647,50 +496,5 @@ public class Board {
             return result;
         }
     }
-
-    public static class Recording {
-        private static final List<State> recordingOfBoards = new ArrayList<>(List.of(new State()));
-        private static final List<String> moveRecording = new ArrayList<>();
-        private static int numOfMovesFromPawnMovingOrPieceCaptured = 0;
-
-        /**
-         * updates the recording of the prior boards, clears recording if non-retractable change was made. <br>
-         * if a pawn was moved - clear in the moveTo method {@link Pawn#moveTo}.<br>
-         * if a piece was captured - clear in the captured method {@link Piece#captured}.<br>
-         * if a castling right was lost - clear in the rook's moveTo method {@link Rook#moveTo}.<br>
-         * if a pawn was promoted - not needed because pawn can be promoted, only if he was moved.<br>
-         * add the current state and check if there are two identical to him, and heck if there were two identical the
-         * current position - if there are change the game status to "threefold - draw"
-         */
-        public static void update() {
-            recordingOfBoards.add(new State());
-            if (recordingOfBoards.stream().filter(recordingOfBoards.get(recordingOfBoards.size() - 1)::equals).count() >= 3) {
-                gameStatus = "threefold - draw";
-            }
-        }
-
-        public static void updateMoveRecording(@NotNull Place fromWhere, @NotNull Place toWhere, Piece piece) {
-            moveRecording.add(toSymbol(piece) + fromWhere + toWhere);
-        }
-
-
-        public static void resetCount() {
-            numOfMovesFromPawnMovingOrPieceCaptured = -1;
-        }
-
-
-        public static void clear() {
-            recordingOfBoards.clear();
-        }
-
-
-        public static void updateCount() {
-            numOfMovesFromPawnMovingOrPieceCaptured++;
-            if (numOfMovesFromPawnMovingOrPieceCaptured >= 100)//over 100 hundred because counting both sides
-                gameStatus = "fifty moves from the last time the a pawn was moved, or a piece was captured - draw";
-
-        }
-    }
-
 
 }

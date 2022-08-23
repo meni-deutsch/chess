@@ -1,6 +1,11 @@
 package board;
 
 import org.jetbrains.annotations.NotNull;
+import board.Place;
+import board.Board;
+import board.Piece;
+
+import java.util.Objects;
 
 public class Place implements Comparable<Place> {
     public final int rank;
@@ -25,8 +30,17 @@ public class Place implements Comparable<Place> {
     }
 
 
-    public boolean equals(@NotNull Place p) {
-        return this.rank == p.getRank() && this.file == p.getFile();
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Place place = (Place) o;
+        return rank == place.rank && file == place.file;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(rank, file);
     }
 
     @Override
@@ -35,8 +49,8 @@ public class Place implements Comparable<Place> {
     }
 
 
-    public boolean isEndangered(String side) {
-        for (Piece piece : Board.oppositeSide(side)) {
+    boolean isEndangered(Side side, Board board) {
+        for (Piece piece : board.oppositeSide(side)) {
             if (piece.makeWhereIAttack().stream().anyMatch(this::equals))
                 return true;
         }

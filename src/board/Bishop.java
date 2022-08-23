@@ -3,17 +3,18 @@ package board;
 import java.util.LinkedList;
 import java.util.List;
 
+
 /**
  * A class that implements the Piece "Bishop" from chess. this Piece can move only in the diagonal. <br>
  * the class extends {@link Piece}
  */
-public class  Bishop extends Piece {
+class  Bishop extends Piece {
 
     /**
      * construct a bishop with the same parameters as Piece constructor
      */
-    public Bishop(String SIDE, Place place) {
-        super(SIDE, place);
+    public Bishop(Side side, Place place) {
+        super(side, place);
     }
 
     /**

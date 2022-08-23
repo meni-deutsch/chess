@@ -3,16 +3,16 @@ package board;
 import java.util.LinkedList;
 import java.util.List;
 
-import static board.Board.WHITE;
+import static board.Side.WHITE;
 
-public class Queen extends Piece {
+class Queen extends Piece {
 
-    public Queen(String SIDE) {
-        super(SIDE, SIDE.equals(WHITE) ? new Place("d1") : new Place("d8"));
+    public Queen(Side side) {
+        super(side, side.equals(WHITE) ? new Place("d1") : new Place("d8"));
     }
 
-    public Queen(String SIDE,Place place) {
-        super(SIDE, place);
+    public Queen(Side side,Place place) {
+        super(side, place);
     }
 
     @Override
