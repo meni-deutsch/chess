@@ -15,7 +15,7 @@ import static board.Side.WHITE;
  * The class that manages the board, moves the pieces, and stores them
  */
 
-public class Board implements IBoardCommands {
+public class Board {
     private static Board instance;
     final King WHITE_KING;
     final King BLACK_KING;
@@ -378,13 +378,11 @@ public class Board implements IBoardCommands {
         return gameStatus;
     }
 
-    @Override
     public List<Place> getAvailablePlaces(int rank, int file) {
 
         return whoIn(rank, file).whereCanIMove;
     }
 
-    @Override
     public Place move(int fromRank, int fileFile, int toRank, int toFile) {
         Place place = new Place(toRank, toFile);
         Piece chosenPiece = whoIn(fromRank, fileFile);
@@ -395,7 +393,6 @@ public class Board implements IBoardCommands {
         return null;
     }
 
-    @Override
     public char getPieceTypeAt(int rank, int file) {
         return whoIn(rank, file) == null ? ' ' : switch (whoIn(rank, file).getClass().getSimpleName()) {
             case "King" -> 'k';
@@ -410,7 +407,6 @@ public class Board implements IBoardCommands {
         };
     }
 
-    @Override
     public Side getPieceSideAt(int rank, int file) {
         return whoIn(rank, file) == null ? null : whoIn(rank, file).SIDE;
     }
