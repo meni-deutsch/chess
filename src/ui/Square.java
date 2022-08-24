@@ -7,12 +7,15 @@ import board.Side;
 import javax.swing.*;
 import java.awt.*;
 
+
 /**
  * a class the represents a square in the board
  */
 class Square extends JButton {
     public static final Color SELECTED_COLOR = Color.GREEN;
     public static final Color WARNING_COLOR = Color.RED;
+
+    //
 
     /**
      * the colour of the black squares.
@@ -21,7 +24,16 @@ class Square extends JButton {
     /**
      * the colour of the white square
      */
-    public static final Color WHITE = new Color(0xF3, 0x92, 0x64);
+    @SuppressWarnings("unused")
+    public static final Color OLD_WHITE = new Color(0xF3, 0x92, 0x64);
+    public static final Color WHITE = new Color(255, 170, 109);
+
+    // colours for blue board
+    @SuppressWarnings("unused")
+    public static final Color BLUE_BLACK = new Color(20, 40, 120);
+    @SuppressWarnings("unused")
+    public static final Color BLUE_WHITE = new Color(50, 255, 255, 255);
+
 
     public final int rank;
     public final int file;
@@ -52,14 +64,14 @@ class Square extends JButton {
         setSize((sizeOfBoard / 8), (sizeOfBoard / 8));
         setLocation(file * getHeight(), getWidth() * 7 - rank * getWidth());
         if (!pieceTypeName.isEmpty()) {
-            if(side == null){
+            if (side == null) {
                 throw new IllegalArgumentException("side must be white or black when pieceType is not empty");
             }
-            ImageIcon imageIcon = new ImageIcon("src/ui/pictures/" + side + " " + pieceTypeName + ".png");
+            ImageIcon imageIcon = new ImageIcon("src/ui/pictures/" + side + " " + pieceTypeName + ".svg.png");
             //imageIcon = new ImageIcon(imageIcon.getImage().getScaledInstance((int)(getWidth()*0.7), (int)(getHeight()*0.7),Image.SCALE_SMOOTH));
             setIcon(imageIcon);
         }
-        addActionListener(e -> GUI.instance.pressed(rank,file));
+        addActionListener(e -> GUI.instance.pressed(rank, file));
         setVisible(true);
 
     }
@@ -82,7 +94,7 @@ class Square extends JButton {
             throw new IllegalArgumentException("pieceType must be b,k,n,p,q,r or space");
 
         if (!pieceTypeName.isEmpty()) {
-            ImageIcon imageIcon = new ImageIcon("src/ui/pictures/" + newSide + " " + pieceTypeName + ".png");
+            ImageIcon imageIcon = new ImageIcon("src/ui/pictures/" + newSide + " " + pieceTypeName + ".svg.png");
             //imageIcon = new ImageIcon(imageIcon.getImage().getScaledInstance((int)(getWidth()*0.7), (int)(getHeight()*0.7),Image.SCALE_SMOOTH));
             setIcon(imageIcon);
         } else
@@ -98,13 +110,14 @@ class Square extends JButton {
 
     }
 
-    public void update(char newPieceType, Side newSide){
-        updateIcon(newPieceType,newSide);
+    public void update(char newPieceType, Side newSide) {
+        updateIcon(newPieceType, newSide);
         updateSize();
         restoreColor();
     }
-    public void update(Board board){
-        update(board.getPieceTypeAt(rank,file),board.getPieceSideAt(rank,file));
+
+    public void update(Board board) {
+        update(board.getPieceTypeAt(rank, file), board.getPieceSideAt(rank, file));
     }
 
     public void restoreColor() {

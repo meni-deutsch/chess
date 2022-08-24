@@ -202,7 +202,7 @@ public class Board {
 
     /**
      * makes a schematic of the board and returns it. every piece is turned into his side plus his type.
-     * for example a black pawn would be written as "black Pawn".
+     * for example a black pawn.svg would be written as "black Pawn".
      *
      * @return a schematic of the board.
      */

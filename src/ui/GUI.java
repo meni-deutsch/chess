@@ -15,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-
 class GUI extends JFrame {
 
     public static final GUI instance = new GUI();
@@ -32,7 +31,7 @@ class GUI extends JFrame {
         minDimension = (int) (Math.min(screenSize.height * 0.9, screenSize.width * 0.9));
         minDimension -= minDimension % 8;
         setSize(minDimension, minDimension);
-        ImageIcon icon = new ImageIcon("src/main/pictures/chess logo.png");
+        ImageIcon icon = new ImageIcon("src/ui/pictures/chess logo.png");
         this.setIconImage(icon.getImage());
         setLocationRelativeTo(null);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

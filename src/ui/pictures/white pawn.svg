@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+        width="70"
+        height="70"
+        version="1.0"
+        viewBox="0 0 62.574489 68.063955"
+        id="svg77"
+        sodipodi:docname="white pawn.svg"
+        inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        xmlns="http://www.w3.org/2000/svg"
+>
+  <defs
+     id="defs8" />
+  <sodipodi:namedview
+     id="namedview6"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="12.975732"
+     inkscape:cx="22.619148"
+     inkscape:cy="30.094641"
+     inkscape:window-width="1846"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg77" />
+  <g
+     id="g12"
+     transform="translate(11.034268,9.4644382)">
+    <path
+       d="m 15.982685,0.89262867 c -3.5,1.80000003 -5.3,5.80000003 -4,9.10000003 0.8,2.3000003 0.6,3.0000003 -2.2000004,5.5000003 -2.7,2.4 -3.3,3.6 -3.3,6.9 0,2.6 0.8,5.2 2.2,7 l 2.1000004,2.9 -2.9000004,1.7 c -4.4,2.6 -7.79999998,8.5 -8.9,15.2 -1.6,10 -3,9.4 21.7000004,9.4 h 21.599999 l -0.7,-6.3 c -0.899999,-8 -3.899999,-14.2 -8.499999,-17.5 l -3.7,-2.7 2.4,-3.5 c 3,-4.5 2.5,-9.4 -1.6,-13.1 -2.1,-1.9 -2.7,-3.1 -2.1,-4.5 1.3,-3.3000003 1,-5.2000003 -1.3,-7.8000003 -2.8,-3.10000003 -7.4,-4.10000003 -10.8,-2.30000003 z"
+       id="path73"
+       style="fill-rule:nonzero" />
+    <path
+       d="m 23.682685,5.1926287 c 0.3,0.9 0.1,3.1 -0.4,4.9000003 -1,3.1 -0.8,3.6 2.3,6.3 4.4,3.9 4.8,9.2 0.9,11.8 -3.3,2.2 -3.2,4.6 0.4,6.7 4.3,2.5 8.9,8.2 10,12.4 2.2,7.7 3.08441,9.45789 -17,7.3 H 1.7826846 l 0.7,-4.3 c 0.4,-2.3 1.3,-5.4 2.1,-6.8 1.4,-2.7 9.1000004,-9.9 10.6000004,-9.9 1.7,0 0.7,-3.3 -1.7,-5.2 -3.8000004,-3 -3.5000004,-8.1 0.9,-12 3.1,-2.7 3.3,-3.2 2.3,-6.3 -1.4,-4.6000003 -0.4,-6.5000003 3.3,-6.5000003 1.9,0 3.3,0.6 3.7,1.6 z"
+       id="path3"
+       style="fill:#ffffff;fill-rule:nonzero" />
+  </g>
+</svg>
