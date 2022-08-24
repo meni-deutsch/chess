@@ -28,19 +28,20 @@ class GUI extends JFrame {
     private GUI() {
         setTitle("Meni's Chess");
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        minDimension = (int) (Math.min(screenSize.height * 0.9, screenSize.width * 0.9));
+        minDimension = (int) (Math.min(screenSize.height * 0.8, screenSize.width * 0.8));
         minDimension -= minDimension % 8;
         setSize(minDimension, minDimension);
-        ImageIcon icon = new ImageIcon("src/ui/pictures/chess logo.png");
+        ImageIcon icon = new ImageIcon("src/ui/ui.pictures/chess logo.png");
         this.setIconImage(icon.getImage());
         setLocationRelativeTo(null);
+        setLocation(getX(),(int)(screenSize.height*0.1));
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         boardPanel = new BoardPanel(minDimension);
         setRootPane(boardPanel);
         setVisible(true);
         barSize = (getBounds().height - getContentPane().getBounds().height);
         System.out.println(getRootPane().getBounds().height + " " + barSize);
-        setSize(minDimension + 15, minDimension + barSize);
+        setSize(minDimension, minDimension + barSize);
         this.getRootPane().addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
                 // This is only called when the user releases the mouse button.
@@ -69,7 +70,7 @@ class GUI extends JFrame {
     }
 
     void update() {
-        minDimension = Math.min(getHeight() - barSize, getWidth() - 15);
+        minDimension = Math.min(getHeight() - barSize, getWidth());
         minDimension -= minDimension % 8;
         Arrays.stream(getContentPane().getComponents()).filter(x -> x instanceof Square).forEach(x -> ((Square) x).update(board));
         //// TODO: 26/04/2022 make a more visually pleasing transition

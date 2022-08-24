@@ -91,10 +91,10 @@ class Pawn extends Piece {
 
     public void promotion() {
         Object[] menu = {
-                (new ImageIcon("src/main/pictures/" + this.SIDE + " queen.png", "queen")),
-                (new ImageIcon("src/main/pictures/" + this.SIDE + " rook.png", "rook")),
-                (new ImageIcon("src/main/pictures/" + this.SIDE + " bishop.png", "bishop")),
-                (new ImageIcon("src/main/pictures/" + this.SIDE + " knight.png", "knight"))
+                (new ImageIcon("src/main/ui.pictures/" + this.SIDE + " queen.png", "queen")),
+                (new ImageIcon("src/main/ui.pictures/" + this.SIDE + " rook.png", "rook")),
+                (new ImageIcon("src/main/ui.pictures/" + this.SIDE + " bishop.png", "bishop")),
+                (new ImageIcon("src/main/ui.pictures/" + this.SIDE + " knight.png", "knight"))
         };
         this.remove();
         switch (JOptionPane.showOptionDialog(null, "", "", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, menu, menu[0])) {
