@@ -67,7 +67,7 @@ class Square extends JButton {
             if (side == null) {
                 throw new IllegalArgumentException("side must be white or black when pieceType is not empty");
             }
-            ImageIcon imageIcon = new ImageIcon("ui.pictures" + side + " " + pieceTypeName + ".svg.png");
+            ImageIcon imageIcon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/pictures/"+ side + " " + pieceTypeName + ".svg.png")));
             imageIcon = new ImageIcon(imageIcon.getImage().getScaledInstance((int) (getWidth() * 0.65), (int) (getHeight() * 0.65), Image.SCALE_SMOOTH));
             setIcon(imageIcon);
         }
@@ -94,8 +94,9 @@ class Square extends JButton {
             throw new IllegalArgumentException("pieceType must be b,k,n,p,q,r or space");
 
         if (!pieceTypeName.isEmpty()) {
-            ImageIcon imageIcon = new ImageIcon("ui.pictures" + newSide + " " + pieceTypeName + ".svg.png");
-            if((int)(getWidth()*0.7)==0 || (int)(getHeight()*0.7)==0)
+
+            ImageIcon imageIcon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/pictures/"+ newSide + " " + pieceTypeName + ".svg.png")));
+            if ((int) (getWidth() * 0.7) == 0 || (int) (getHeight() * 0.7) == 0)
                 imageIcon = null;
             else
                 imageIcon = new ImageIcon(imageIcon.getImage().getScaledInstance((int) (getWidth() * 0.65), (int) (getHeight() * 0.65), Image.SCALE_SMOOTH));

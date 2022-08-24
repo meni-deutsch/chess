@@ -31,7 +31,7 @@ class GUI extends JFrame {
         minDimension = (int) (Math.min(screenSize.height * 0.8, screenSize.width * 0.8));
         minDimension -= minDimension % 8;
         setSize(minDimension, minDimension);
-        ImageIcon icon = new ImageIcon("src/ui/ui.pictures/chess logo.png");
+        ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/pictures/chess logo.png")));
         this.setIconImage(icon.getImage());
         setLocationRelativeTo(null);
         setLocation(getX(),(int)(screenSize.height*0.1));
