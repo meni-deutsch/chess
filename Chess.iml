@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_14">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_16">
     <output url="file://$MODULE_DIR$/out/production/Chess" />
     <output-test url="file://$MODULE_DIR$/out/test/Chess" />
     <exclude-output />
@@ -54,33 +54,14 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/annotations/23.0.0/annotations-23.0.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
-  <build>
-          <plugins>
-              <plugin>
-                  <artifactId>maven-assembly-plugin</artifactId>
-                  <configuration>
-                      <finalName>ServiceCreate</finalName>
-                      <appendAssemblyId>false</appendAssemblyId>
-                      <archive>
-                          <manifest>
-                              <mainClass>ui.GUI</mainClass>
-                          </manifest>
-                      </archive>
-                      <descriptorRefs>
-                          <descriptorRef>jar-with-dependencies</descriptorRef>
-                      </descriptorRefs>
-                  </configuration>
-              </plugin>
-              <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-compiler-plugin</artifactId>
-                  <configuration>
-                      <source>1.8</source>
-                      <target>1.8</target>
-                  </configuration>
-              </plugin>
-          </plugins>
-      </build>
-
 </module>

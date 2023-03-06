@@ -1,7 +1,7 @@
 package ui;
 
 
-import board.Board;
+import board.Controller;
 import board.Side;
 
 import javax.swing.*;
@@ -41,6 +41,7 @@ class Square extends JButton {
      * the default color of this square.
      */
     public final Color color;
+    private boolean endangered;
 
 
     public Square(int rank, int file, int sizeOfBoard, char pieceType, Side side) {
@@ -121,12 +122,13 @@ class Square extends JButton {
         restoreColor();
     }
 
-    public void update(Board board) {
-        update(board.getPieceTypeAt(rank, file), board.getPieceSideAt(rank, file));
+    public void update() {
+        update(Controller.getPieceTypeAt(rank, file), Controller.getPieceSideAt(rank, file));
     }
 
     public void restoreColor() {
         setBackground(color);
+
     }
 
     public void selected() {
@@ -141,4 +143,6 @@ class Square extends JButton {
     public void clearActionListener() {
         this.removeActionListener(getActionListeners()[0]);
     }
+
+
 }

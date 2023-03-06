@@ -1,6 +1,6 @@
 package ui;
 
-import board.Board;
+import board.Controller;
 import board.Place;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,11 +19,9 @@ class GUI extends JFrame {
 
     public static final GUI instance = new GUI();
     final BoardPanel boardPanel;
-    final Board board = Board.newInstance();
     private final int barSize;
     private int minDimension;
 
-    private Place chosenPlace = null;
 
     private GUI() {
         setTitle("Meni's Chess");
@@ -34,7 +32,7 @@ class GUI extends JFrame {
         ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/pictures/chess logo.png")));
         this.setIconImage(icon.getImage());
         setLocationRelativeTo(null);
-        setLocation(getX(),(int)(screenSize.height*0.1));
+        setLocation(getX(), (int) (screenSize.height * 0.1));
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         boardPanel = new BoardPanel(minDimension);
         setRootPane(boardPanel);
@@ -51,18 +49,18 @@ class GUI extends JFrame {
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                board.printMoveRecording();
+                Controller.printMoveRecording();
             }
         });
     }
 
 
-
     @SuppressWarnings("EmptyMethod")
-    public static void main(String[] args) {}
+    public static void main(String[] args) {
+    }
 
     boolean gameContinues() {
-        return board.getGameStatus().equals("on going");
+        return Controller.getGameStatus().equals("on going");
     }
 
     Square getSquareAt(@NotNull Place place) {
@@ -72,7 +70,7 @@ class GUI extends JFrame {
     void update() {
         minDimension = Math.min(getHeight() - barSize, getWidth());
         minDimension -= minDimension % 8;
-        Arrays.stream(getContentPane().getComponents()).filter(x -> x instanceof Square).forEach(x -> ((Square) x).update(board));
+        Arrays.stream(getContentPane().getComponents()).filter(x -> x instanceof Square).forEach(x -> ((Square) x).update());
         //// TODO: 26/04/2022 make a more visually pleasing transition
     }
 
@@ -95,41 +93,55 @@ class GUI extends JFrame {
     public void close() {
         Arrays.stream(getContentPane().getComponents()).filter(x -> x instanceof Square).forEach(x -> ((Square) x).clearActionListener());
         System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, StandardCharsets.UTF_8));
-        board.printMoveRecording();
-        JOptionPane.showMessageDialog(null, "The Game Ended - " + board.getGameStatus());
+        Controller.printMoveRecording();
+        JOptionPane.showMessageDialog(null, "The Game Ended - " + Controller.getGameStatus());
     }
 
     public void pressed(int rank, int file) {
-        if (chosenPlace != null && board.getAvailablePlaces(chosenPlace.rank, chosenPlace.file).contains(new Place(rank, file))) {
-            Place endangeredPlace = board.move(chosenPlace.rank, chosenPlace.file, rank, file);
-            updateLocations();
-            if (endangeredPlace != null) {
-                updateEndangered(endangeredPlace);
+        if (Controller.isPieceChosen()) {
+            if (Controller.movePieceTo(rank, file)) {
+                if (Controller.isReadyToPromote()) {
+                    Object[] menu = {
+                            new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/pictures/" + Controller.getSide() + " " + "queen" + ".svg.png"))),
+                            new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/pictures/" + Controller.getSide() + " " + "rook" + ".svg.png"))),
+                            new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/pictures/" + Controller.getSide() + " " + "bishop" + ".svg.png"))),
+                            new ImageIcon(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/pictures/" + Controller.getSide() + " " + "knight" + ".svg.png")))
+                    };
+                    switch (JOptionPane.showOptionDialog(null, "", "", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, menu, menu[0])) {
+                        case 1 -> Controller.promote('r');
+                        case 2 -> Controller.promote('b');
+                        case 3 -> Controller.promote('n');
+                        default -> Controller.promote('q');
+                    }
+                }
+
+                updateLocations();
+                EventQueue.invokeLater(this::update);
+                if (Controller.getEndangeredKing() != null) {
+                    EventQueue.invokeLater(() -> updateEndangered(Controller.getEndangeredKing()));
+                }
+
+
+                Controller.changeTurn();
+                if (!gameContinues())
+                    close();
+                return;
             }
-            board.changeTurn();
-            chosenPlace = null;
-            EventQueue.invokeLater(this::update);
-            if (!gameContinues())
-                close();
-            return;
+            restoreLocations(Controller.getAvailablePlaces());
+        }
 
-        }
-        if (chosenPlace != null) {
-            restoreLocations(board.getAvailablePlaces(chosenPlace.rank, chosenPlace.file));
-            chosenPlace = null;
-        }
-        if(board.getSide() == board.getPieceSideAt(rank, file)) {
-            chosenPlace = new Place(rank, file);
-            annotatePossibleLocations(board.getAvailablePlaces(rank, file));
-        }
+        if (Controller.setMovingPiece(rank, file))
+
+            annotatePossibleLocations(Controller.getAvailablePlaces());
+
+
     }
-
 
 
     private void updateLocations() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                boardPanel.squares[i][j].update(board.getPieceTypeAt(i, j), board.getPieceSideAt(i, j));
+                boardPanel.squares[i][j].update(Controller.getPieceTypeAt(i, j), Controller.getPieceSideAt(i, j));
             }
         }
     }
@@ -146,7 +158,7 @@ class GUI extends JFrame {
             setBackground(Color.black);
             for (int i = 0; i < 8; i++) {
                 for (int j = 0; j < 8; j++) {
-                    squares[i][j] = new Square(i, j, size, board.getPieceTypeAt(i, j), board.getPieceSideAt(i, j));
+                    squares[i][j] = new Square(i, j, size, Controller.getPieceTypeAt(i, j), Controller.getPieceSideAt(i, j));
                     getContentPane().add(squares[i][j]);
                 }
 

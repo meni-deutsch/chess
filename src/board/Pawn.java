@@ -11,6 +11,7 @@ import static board.Side.WHITE;
 
 class Pawn extends Piece {
     private boolean wasMoved = false;
+    static Place pawnToPromote = null;
 
     public Pawn(Side side, Place place) {
         super(side, place);
@@ -82,7 +83,7 @@ class Pawn extends Piece {
 
         super.moveTo(whereToMove);
 
-        if (whereToMove.getRank() == 7) {
+        if (whereToMove.getRank() == 7||whereToMove.getRank() == 0) {
             //EventQueue.invokeLater(board::updateUI);
             promotion();
         }
@@ -90,20 +91,21 @@ class Pawn extends Piece {
 
 
     public void promotion() {
-        Object[] menu = {
-                (new ImageIcon("src/main/ui.pictures/" + this.SIDE + " queen.png", "queen")),
-                (new ImageIcon("src/main/ui.pictures/" + this.SIDE + " rook.png", "rook")),
-                (new ImageIcon("src/main/ui.pictures/" + this.SIDE + " bishop.png", "bishop")),
-                (new ImageIcon("src/main/ui.pictures/" + this.SIDE + " knight.png", "knight"))
-        };
-        this.remove();
-        switch (JOptionPane.showOptionDialog(null, "", "", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, menu, menu[0])) {
-            case 1 -> board.add(new Rook(SIDE, place));
-            case 2 -> board.add(new Bishop(SIDE, place));
-            case 3 -> board.add(new Knight(SIDE, place));
-            default -> board.add(new Queen(SIDE, place));
-
-        }
+        pawnToPromote = getPlace();
+//        Object[] menu = {
+//                (new ImageIcon("src/main/ui.pictures/" + this.SIDE + " queen.png", "queen")),
+//                (new ImageIcon("src/main/ui.pictures/" + this.SIDE + " rook.png", "rook")),
+//                (new ImageIcon("src/main/ui.pictures/" + this.SIDE + " bishop.png", "bishop")),
+//                (new ImageIcon("src/main/ui.pictures/" + this.SIDE + " knight.png", "knight"))
+//        };
+//        this.remove();
+//        switch (JOptionPane.showOptionDialog(null, "", "", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, menu, menu[0])) {
+//            case 1 -> board.add(new Rook(SIDE, place));
+//            case 2 -> board.add(new Bishop(SIDE, place));
+//            case 3 -> board.add(new Knight(SIDE, place));
+//            default -> board.add(new Queen(SIDE, place));
+//
+//        }
 
 
     }

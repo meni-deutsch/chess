@@ -16,7 +16,7 @@ import static board.Side.WHITE;
  * The class that manages the board, moves the pieces, and stores them
  */
 
-public class Board {
+class Board {
     private static Board instance;
     final King WHITE_KING;
     final King BLACK_KING;
@@ -25,7 +25,7 @@ public class Board {
     private final List<String> moveRecording = new ArrayList<>();
     final private List<Piece> whitePieces = new LinkedList<>();
     final private List<Piece> blackPieces = new LinkedList<>();
-    private Place endangeredKing;
+    Place endangeredKing;
     /**
      * A variable that says if the game is on going, or over, and if it's over from which cause
      */
@@ -74,7 +74,7 @@ public class Board {
         return instance;
     }
 
-    public static Board newInstance() {
+    static Board newInstance() {
         instance = new Board();
         return instance;
     }
@@ -86,7 +86,7 @@ public class Board {
      * @param y the y coordinate
      * @return is the place inputted by x and y isn't in the bounds of the board
      */
-    public static boolean isOutOfBounds(int x, int y) {
+    static boolean isOutOfBounds(int x, int y) {
         return 0 > x || x > 7 || 0 > y || y > 7;
     }
 
@@ -227,7 +227,8 @@ public class Board {
      * @param place the location of the wanted piece.
      * @return the piece in place.
      */
-    @Nullable Piece whoIn(@NotNull Place place) {
+    @Nullable
+    Piece whoIn(@NotNull Place place) {
         return whoIn(place.getRank(), place.getFile());
     }
 
@@ -238,7 +239,8 @@ public class Board {
      * @param file the file of the wanted piece. {@link Place#file}
      * @return the piece in rank and file
      */
-    @Nullable Piece whoIn(int rank, int file) {
+    @Nullable
+    Piece whoIn(int rank, int file) {
         if (rank < 0 || file < 0 || rank > 7 || file > 7)
             return null;
         return board[rank][file];
@@ -300,7 +302,8 @@ public class Board {
      * @param side the side that is opposite to the wanted side
      * @return the pieces of the opposite side
      */
-    @Unmodifiable List<Piece> oppositeSide(@NotNull Side side) {
+    @Unmodifiable
+    List<Piece> oppositeSide(@NotNull Side side) {
         return side.equals(WHITE) ? List.copyOf(blackPieces) : List.copyOf(whitePieces);
     }
 
@@ -310,7 +313,8 @@ public class Board {
      * @param side the side of the wanted pieces
      * @return the pieces of the opposite side
      */
-    @Unmodifiable List<Piece> mySide(@NotNull Side side) {
+    @Unmodifiable
+    List<Piece> mySide(@NotNull Side side) {
         return side == WHITE ? List.copyOf(whitePieces) : List.copyOf(blackPieces);
     }
 
@@ -348,14 +352,14 @@ public class Board {
     }
 
 
-
     /**
      * returns a symbol corresponding with the type of the pieces
      *
      * @param piece the pieces to make into a symbol
      * @return a symbol corresponding with the type of the pieces
      */
-    @NotNull String toSymbol(Piece piece) {
+    @NotNull
+    String toSymbol(Piece piece) {
         if (piece instanceof King)
             return piece.SIDE.equals(WHITE) ? "\u265A" : "\u2654";
         if (piece instanceof Queen)
@@ -375,42 +379,35 @@ public class Board {
     /**
      * @return the status of the game
      */
-    public String getGameStatus() {
+    String getGameStatus() {
         return gameStatus;
     }
 
-    public List<Place> getAvailablePlaces(int rank, int file) {
 
-        return whoIn(rank, file).whereCanIMove;
-    }
 
-    public Place move(int fromRank, int fileFile, int toRank, int toFile) {
+
+    public void move(int fromRank, int fileFile, int toRank, int toFile) {
         Place place = new Place(toRank, toFile);
         Piece chosenPiece = whoIn(fromRank, fileFile);
         if (chosenPiece.whereCanIMove.contains(place)) {
             chosenPiece.moveTo(place);
-            return endangeredKing;
         }
-        return null;
     }
 
-    public char getPieceTypeAt(int rank, int file) {
-        return whoIn(rank, file) == null ? ' ' : switch (whoIn(rank, file).getClass().getSimpleName()) {
-            case "King" -> 'k';
-            case "Queen" -> 'q';
-            case "Rook" -> 'r';
-            case "Bishop" -> 'b';
-            case "Knight" -> 'n';
-            case "Pawn" -> 'p';
-            case "GhostPawn" -> ' ';
-            default ->
-                    throw new IllegalStateException("Unexpected value: " + whoIn(rank, file).getClass().getSimpleName());
-        };
-    }
+//    public char getPieceTypeAt(int rank, int file) {
+//        return whoIn(rank, file) == null ? ' ' : switch (whoIn(rank, file).getClass().getSimpleName()) {
+//            case "King" -> 'k';
+//            case "Queen" -> 'q';
+//            case "Rook" -> 'r';
+//            case "Bishop" -> 'b';
+//            case "Knight" -> 'n';
+//            case "Pawn" -> 'p';
+//            case "GhostPawn" -> ' ';
+//            default ->
+//                    throw new IllegalStateException("Unexpected value: " + whoIn(rank, file).getClass().getSimpleName());
+//        };
+//    }
 
-    public Side getPieceSideAt(int rank, int file) {
-        return whoIn(rank, file) == null ? null : whoIn(rank, file).SIDE;
-    }
 
 
 
@@ -449,18 +446,12 @@ public class Board {
 
     }
 
-    public void printMoveRecording() {
+    void printMoveRecording() {
         int[] i = {1};
         moveRecording.forEach(move -> System.out.println((i[0]++) + " " + move));
     }
 
-    public void changeTurn() {
-        Game.changeTurn();
-    }
 
-    public Side getSide() {
-        return Game.getSide();
-    }
 
     private class State {
         public final String[][] BOARD;
